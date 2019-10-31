@@ -1,0 +1,190 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.methodscript</groupId>
+    <artifactId>MSSMS</artifactId>
+    <version>0.0.1</version>
+    <packaging>jar</packaging>
+
+    <name>MSSMS</name>
+    <url>https://methodscript.com</url>
+    
+    <ciManagement>
+        <system>hudson</system>
+        <url>https://letsbuild.net/jenkins/job/MSSMS/</url>
+    </ciManagement>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>        
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>commandhelper</artifactId>
+            <version>3.3.4-SNAPSHOT</version>
+        </dependency>
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>7.44.0</version>
+		</dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <inherited>true</inherited>
+                <version>3.1.2</version>
+                
+                <configuration>
+                    <archive>                   
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        
+                        <manifestEntries>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>ShadedBundle</id>
+                        <phase>package</phase>
+                        
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+									<include>com.twilio.sdk:twilio:jar:*</include>
+									<include>org.apache.httpcomponents:httpclient:jar:*</include>
+									<include>org.apache.httpcomponents:httpcore:jar:*</include>
+									<include>com.google.guava:guava:jar:*</include>
+									<include>commons-logging:commons-logging:jar:*</include>
+									<include>com.fasterxml.jackson.core:jackson-databind:jar:*</include>
+									<include>com.fasterxml.jackson.core:jackson-core:jar:*</include>
+									<include>com.fasterxml.jackson.core:jackson-annotations:jar:*</include>
+									<include>javax.xml.bind:jaxb-api:jar:*</include>
+									<include>joda-time:joda-time:jar:*</include>
+                                </includes>
+                            </artifactSet>
+							<filters>
+								<filter>
+									<artifact>com.twilio.sdk:twilio:jar:*</artifact>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>									
+							</filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Leave this alone! Verifies some things so that your extension works. -->
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+        
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <phase>process-classes</phase>
+                        
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                    </execution>
+                </executions>
+        
+                <configuration>
+                    <outputDirectory>src/main/generated</outputDirectory>
+          
+                    <processors>
+                        <processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
+                    </processors>
+                </configuration>
+            </plugin>
+            
+            <!-- Leave this alone! Speeds up extension loading. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+        
+                <executions>
+                    <execution>
+                        <id>cache-annotations</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+        
+                <configuration>
+                    <mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
+          
+                    <arguments>
+                        <argument>${basedir}/target/classes</argument>
+                        <argument>${basedir}/target/classes</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <showDeprecation>false</showDeprecation>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file</arg>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                    <fork>true</fork>
+                    <optimize>true</optimize>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <repositories>
+        <repository>
+            <id>sk89q-repo</id>
+            <url>http://maven.sk89q.com/repo</url>
+        </repository>
+    </repositories>
+    
+    
+</project>
