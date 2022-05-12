@@ -7,7 +7,7 @@ import com.laytonsmith.core.constructs.CSecureString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -56,7 +56,7 @@ public class MSSMSFunctions {
 				to = args[2].val();
 			}
 			String message = args[3].val();
-			Profiles profiles = environment.getEnv(GlobalEnv.class).getProfiles();
+			Profiles profiles = environment.getEnv(StaticRuntimeEnv.class).getProfiles();
 			SMSActions action;
 			try {
 				Profiles.Profile prof = profiles.getProfileById(id);
